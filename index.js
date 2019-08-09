@@ -10,9 +10,42 @@ const Record = require ('./models/record')
 app.use(bodyParser.urlencoded({ exttended: false}))
 app.use(bodyParser.json())
 
+var json = {};
 /*app.get('/:name', (req, res)=> { //peticion  GET
-  res.send({message : `Hola ${req.params.name}`})
+res.send({message : `Hola ${req.params.name}`})
 })*/
+
+app.get('/api/record/data', (req, res) => {
+  Record.countDocuments({}, function(err, count){
+    json.count = count;
+
+  Record.findOne({}, {}, { sort: { '_id' : -1 } }, function(err, record) {
+    json.last = record;
+
+    Record.findOne({}, {}, { sort: { '_id' : 1 } }, function(err, record) {
+      json.first = record;
+
+        res.json(json);
+        }).sort("-size");
+      }).sort("-name");
+    }).sort("-itemCount");
+})
+
+
+app.get('/api/record/last', (req, res) => {
+  let lastRec = Record.findOne({}, {}, { sort: { '_id' : -1 } }, function(err, record) {
+    if (err) return res.status(500).send({message: `Error al realizar la peticion: ${err}`})
+    res.status(200).send({record: record })
+  });
+
+})
+
+app.get('/api/record/count', (req, res) => {
+  Record.countDocuments({}, function(err, count){
+    if (err) return res.status(500).send({message: `Error al realizar la peticion: ${err}`})
+    res.status(200).send({count: count })
+  });
+})
 
 app.get('/api/record', (req, res) => {
   Record.find({}, (err, records) =>{
@@ -21,6 +54,7 @@ app.get('/api/record', (req, res) => {
     res.status(200).send({records})
   })
 })
+
 app.get('/api/record/:id', (req, res) => {
   let recordId= req.params.id
   Record.findById(recordId, (err, record) =>{
@@ -42,7 +76,7 @@ app.post ('/api/record' , (req, res) =>{
   record.num2 = req.body.num2
   record.device = req.body.device
   record.user = req.body.user
-
+  record.date= new Date
   record.save((err ,  recordStored)=>{
     if (err) res.status(500).send({message: `ERROR al guardar en base de datos: ${err}`})
     res.status(200).send({record: recordStored})
@@ -71,7 +105,7 @@ app.delete('/api/record/:id', (req, res) => {
 })
 
 
-mongoose.connect('mongodb://localhost:27017/shop', (err, res) =>{
+mongoose.connect('mongodb://localhost:27017/arduino', (err, res) =>{
   if (err) {
     return console.log('Error al conectar a mongoDB');
   }
