@@ -15,10 +15,19 @@ app.use(bodyParser.json())
 })*/
 
 app.get('/api/record', (req, res) => {
-  res.send(200, {record: []})
+  Record.find({}, (err, records) =>{
+    if (err) return res.status(500).send({message: `Error al realizar la peticion: ${err}`})
+    if (!records) return res.status(404).send({message: `Error no existen registros en mongoDB: ${err}`})
+    res.status(200).send({records})
+  })
 })
 app.get('/api/record/:id', (req, res) => {
-
+  let recordId= req.params.id
+  Record.findById(recordId, (err, record) =>{
+    if (err) return res.status(500).send({message: `Error al realizar la peticion: ${err}`})
+    if (!record) return res.status(404).send({message: `Error no existe el id en mongoDB: ${err}`})
+    res.status(200).send({record})
+  })
 })
 
 app.post ('/api/record' , (req, res) =>{
@@ -41,19 +50,32 @@ app.post ('/api/record' , (req, res) =>{
 })
 
 app.put('/api/record/:id', (req , res)=>{
-
+  let recordId= req.params.id
+  let recordUpdate = req.body //obtenemos el cuerpo de la perticion
+  Record.findByIdAndUpdate(recordId, recordUpdate, (err, recordUpdated) =>{
+    if (err) return res.status(500).send({message: `Error al actulizar el registro: ${err}`})
+    res.status(200).send({record: recordUpdate})
+  })
 })
 
 app.delete('/api/record/:id', (req, res) => {
+  let recordId= req.params.id
+  Record.findById(recordId, (err, record) =>{
+    if (err) return res.status(500).send({message: `Error al realizar la peticion: ${err}`})
 
+    record.remove(err=>{
+      if (err) res.status(500).send({message: `ERROR al guardar en base de datos: ${err}`})
+      res.status(200).send({message: `Se eliminó el registro de mongoDB`})
+    })
+  })
 })
 
 
 mongoose.connect('mongodb://localhost:27017/shop', (err, res) =>{
   if (err) {
-    return console.log('Error al conectar a MONGO DB');
+    return console.log('Error al conectar a mongoDB');
   }
-  console.log('conectado a MONGODB');
+  console.log('conectado a mongoDB');
 
   app.listen(port, ()=> {
     console.log(`API REST corriendo en puerto: ${port}`)
