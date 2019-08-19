@@ -1,5 +1,6 @@
 'use strict'
 const express = require('express')
+var cors = require('cors');
 
 const app = express() //server
 const bodyParser = require ('body-parser') //json
@@ -9,6 +10,7 @@ const Record = require ('./models/record')
 
 app.use(bodyParser.urlencoded({ exttended: false}))
 app.use(bodyParser.json())
+app.use(cors());
 
 var json = {};
 /*app.get('/:name', (req, res)=> { //peticion  GET
