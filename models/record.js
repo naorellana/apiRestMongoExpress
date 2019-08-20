@@ -7,6 +7,7 @@ const RecordSchema =Schema ({
   text2: String,
   num1: {type: Number, default: 0},
   num2: {type: Number, default: 0},
+  num3: {type: Number, default: 0},
   device: {type: Number, default: 0},
   user: {type: Number, default: 0},
   date: { type: Date, default: Date.now  }

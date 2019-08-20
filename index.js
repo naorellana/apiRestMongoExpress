@@ -33,6 +33,21 @@ app.get('/api/record/data', (req, res) => {
     }).sort("-itemCount");
 })
 
+app.get('/api/record/device', (req, res) => {
+  Record.find().distinct('device',  (err, records) =>{
+    if (err) return res.status(500).send({message: `Error al realizar la peticion: ${err}`})
+    if (!records) return res.status(404).send({message: `Error no existen registros en mongoDB: ${err}`})
+    res.status(200).send({records})
+  })
+})
+app.get('/api/record/device/:id', (req, res) => {
+  let device= req.params.id
+  Record.findOne({'device': device},  (err, records) =>{
+    if (err) return res.status(500).send({message: `Error al realizar la peticion: ${err}`})
+    if (!records) return res.status(404).send({message: `Error no existen registros en mongoDB: ${err}`})
+    res.status(200).send({records})
+  }).sort([['date', -1]])
+})
 
 app.get('/api/record/last', (req, res) => {
   let lastRec = Record.findOne({}, {}, { sort: { '_id' : -1 } }, function(err, record) {
@@ -54,7 +69,7 @@ app.get('/api/record', (req, res) => {
     if (err) return res.status(500).send({message: `Error al realizar la peticion: ${err}`})
     if (!records) return res.status(404).send({message: `Error no existen registros en mongoDB: ${err}`})
     res.status(200).send({records})
-  })
+  }).sort([['date', -1]])
 })
 
 app.get('/api/record/:id', (req, res) => {
@@ -76,6 +91,7 @@ app.post ('/api/record' , (req, res) =>{
   record.text2 = req.body.text2
   record.num1 = req.body.num1
   record.num2 = req.body.num2
+  record.num3 = req.body.num3
   record.device = req.body.device
   record.user = req.body.user
   record.date= new Date
